@@ -4,4 +4,12 @@ version = "0.1.0"
 description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.11"
-dependencies = []
+dependencies = [
+    "dash-bootstrap-components>=1.6.0",
+    "dash-bootstrap-templates>=1.2.4",
+    "dash-iconify>=0.1.2",
+    "dash-mantine-components>=0.14.4",
+    "dash>=2.18.1",
+    "pandas-datareader>=0.10.0",
+    "pandas>=2.2.3",
+]
