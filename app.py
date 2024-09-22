@@ -10,10 +10,10 @@ from dash import (
     _dash_renderer,
 )
 import dash_mantine_components as dmc
-import dash_bootstrap_components as dbc
 from dash.dependencies import Input, Output, State
 from dash_iconify import DashIconify
 import pandas as pd
+import plotly.graph_objects as go
 
 _dash_renderer._set_react_version("18.2.0")
 
@@ -181,7 +181,9 @@ def make_summary_table(dff):
             ],
         }
     )
-    return dbc.Table.from_dataframe(df_table, bordered=True, hover=True)
+
+    table = dmc.Table(df_table)
+    return table
 
 
 """
@@ -282,10 +284,10 @@ Make Tabs
 
 # =======Play tab components
 
-asset_allocation_card = dbc.Card(asset_allocation_text, className="mt-2")
+asset_allocation_card = dmc.Card(asset_allocation_text, className="mt-2")
 
-slider_card = dbc.Card(
-    [
+slider_card = dmc.Card(
+   children=[
         html.H4("First set cash allocation %:", className="card-title"),
         dcc.Slider(
             id="cash",
@@ -311,7 +313,9 @@ slider_card = dbc.Card(
             included=False,
         ),
     ],
-    body=True,
+    withBorder=True,
+    shadow="sm",
+    radius="md",
     className="mt-4",
 )
 
@@ -345,48 +349,44 @@ time_period_data = [
 ]
 
 
-time_period_card = dbc.Card(
-    [
+time_period_card = dmc.Card(
+    children=[
         html.H4(
             "Or select a time period:",
             className="card-title",
         ),
-        dbc.RadioItems(
+        dmc.RadioGroup(
             id="time_period",
-            options=[
-                {"label": period["label"], "value": i}
+            children=dmc.Group([
+                dmc.Radio(period["label"], value=i)
                 for i, period in enumerate(time_period_data)
-            ],
-            value=0,
-            labelClassName="mb-2",
+            ]),
+            value=0
         ),
     ],
-    body=True,
-    className="mt-4",
+    className="mt-4"
 )
 
 # ======= InputGroup components
 
-start_amount = dbc.InputGroup(
-    [
-        dbc.InputGroupText("Start Amount $"),
-        dbc.Input(
+start_amount = dmc.Group(
+    children=[
+        dmc.Text("Start Amount $"),
+        dmc.NumberInput(
             id="starting_amount",
-            placeholder="Min $10",
-            type="number",
+            label="Min $10",
             min=10,
             value=10000,
         ),
     ],
     className="mb-3",
 )
-start_year = dbc.InputGroup(
-    [
-        dbc.InputGroupText("Start Year"),
-        dbc.Input(
+start_year = dmc.Group(
+    children=[
+        dmc.Text("Start Year"),
+        dmc.NumberInput(
             id="start_yr",
-            placeholder=f"min {MIN_YR}   max {MAX_YR}",
-            type="number",
+            label=f"min {MIN_YR}   max {MAX_YR}",
             min=MIN_YR,
             max=MAX_YR,
             value=START_YR,
@@ -394,35 +394,34 @@ start_year = dbc.InputGroup(
     ],
     className="mb-3",
 )
-number_of_years = dbc.InputGroup(
-    [
-        dbc.InputGroupText("Number of Years:"),
-        dbc.Input(
+number_of_years = dmc.Group(
+    children=[
+        dmc.Text("Number of Years:"),
+        dmc.NumberInput(
             id="planning_time",
-            placeholder="# yrs",
-            type="number",
+            label="# yrs",
             min=1,
             value=MAX_YR - START_YR + 1,
         ),
     ],
     className="mb-3",
 )
-end_amount = dbc.InputGroup(
-    [
-        dbc.InputGroupText("Ending Amount"),
-        dbc.Input(id="ending_amount", disabled=True, className="text-black"),
+end_amount = dmc.Group(
+    children=[
+        dmc.Text("Ending Amount"),
+        dmc.NumberInput(id="ending_amount", disabled=True, className="text-black"),
     ],
     className="mb-3",
 )
-rate_of_return = dbc.InputGroup(
+rate_of_return = dmc.Group(
     [
-        dbc.InputGroupText(
+        dmc.Text(
             "Rate of Return(CAGR)",
             id="tooltip_target",
             className="text-decoration-underline",
         ),
-        dbc.Input(id="cagr", disabled=True, className="text-black"),
-        dbc.Tooltip(cagr_text, target="tooltip_target"),
+        dmc.NumberInput(id="cagr", disabled=True, className="text-black"),
+        dmc.Tooltip(label="CAGR",children=cagr_text),
     ],
     className="mb-3",
 )
@@ -435,28 +434,28 @@ input_groups = html.Div(
 
 # =====  Results Tab components
 
-results_card = dbc.Card(
-    [
-        dbc.CardHeader("My Portfolio Returns - Rebalanced Annually"),
+results_card = dmc.Card(
+    children=[
+        dmc.Title("My Portfolio Returns - Rebalanced Annually"),
         html.Div(total_returns_table),
     ],
     className="mt-4",
 )
 
 
-data_source_card = dbc.Card(
-    [
-        dbc.CardHeader("Source Data: Annual Total Returns"),
+data_source_card = dmc.Card(
+    children=[
+        dmc.Title("Source Data: Annual Total Returns"),
         html.Div(annual_returns_pct_table),
     ],
     className="mt-4",
 )
 
 
-learn_card = dbc.Card(
-    [
-        dbc.CardHeader("An Introduction to Asset Allocation"),
-        dbc.CardBody(learn_text),
+learn_card = dmc.Card(
+    children=[
+        dmc.Title("An Introduction to Asset Allocation"),
+        dmc.CardSection(learn_text),
     ],
     className="mt-4",
 )
@@ -525,22 +524,22 @@ app_shell = dmc.AppShell(
         navbar,
         dmc.AppShellMain(
             children=[
-                dbc.Col(
-                    [
+                dmc.Stack(
+                    children=[
                         dcc.Graph(id="allocation_pie_chart", className="mb-2"),
                         dcc.Graph(id="returns_chart", className="pb-4"),
                         html.Hr(),
                         html.Div(id="summary_table"),
                         html.H6(datasource_text, className="my-2"),
                     ],
-                    width=12,
-                    lg=7,
+                    w=12,
+                    align="right",
                     className="pt-4",
                 ),
             ],
             className="ms-1",
         ),
-        dbc.Row(dbc.Col(footer)),
+        dmc.Group(dmc.Stack(footer)),
     ],
     header={"height": 60},
     navbar={
